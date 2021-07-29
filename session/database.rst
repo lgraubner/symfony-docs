@@ -27,7 +27,7 @@ First, define a Symfony service for the connection to the Redis server:
         services:
             # ...
             Redis:
-                # you can also use \RedisArray, \RedisCluster or \Predis\Client classes
+                # you can also use \RedisArray or \RedisCluster\Predis\Client classes
                 class: Redis
                 calls:
                     - connect:
@@ -70,6 +70,62 @@ First, define a Symfony service for the connection to the Redis server:
             ->addMethodCall('connect', ['%env(REDIS_HOST)%', '%env(int:REDIS_PORT)%'])
             // uncomment the following if your Redis server requires a password:
             // ->addMethodCall('auth', ['%env(REDIS_PASSWORD)%'])
+        ;
+
+If you prefer `\Predis\Client` it looks like this:
+
+.. configuration-block::
+
+    .. code-block:: yaml
+
+        # config/services.yaml
+        services:
+            # ...
+            Redis:
+                class: \Predis\Client
+                arguments:
+                    -
+                        host: '%env(REDIS_HOST)%'
+                        port: '%env(int:REDIS_PORT)%'
+                        # uncomment the following if your Redis server requires a password
+                        password: '%env(REDIS_PASSWORD)%'
+
+    .. code-block:: xml
+
+        <?xml version="1.0" encoding="UTF-8" ?>
+        <container xmlns="http://symfony.com/schema/dic/services"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+            <services>
+                <service id="Redis" class="\Predis\Client">
+                    <argument type="collection">
+                        <argument key="host">%env(int:REDIS_HOST)%</argument>
+                        <argument key="port">%env(int:REDIS_PORT)%</argument>
+                        <!-- uncomment the following if your Redis server requires a password:
+                        <argument key="password">%env(REDIS_PASSWORD)%</argument> -->
+                    </argument>
+
+                    <!-- uncomment the following if your Redis server requires a password:
+                    <call method="auth">
+                        <argument>%env(REDIS_PASSWORD)%</argument>
+                    </call> -->
+                </service>
+            </services>
+        </container>
+
+    .. code-block:: php
+
+        // ...
+        $container
+            // you can also use \RedisArray, \RedisCluster or \Predis\Client classes
+            ->register('Redis', \Redis::class)
+            ->addArgument([
+                'host' => '%env(REDIS_HOST)%',
+                'port' => '%env(int:REDIS_PORT)%',
+                // uncomment the following if your Redis server requires a password:
+                // 'password' => '%env(REDIS_PASSWORD)%',
+            ])
         ;
 
 Now pass this ``\Redis`` connection as an argument of the service associated to the
